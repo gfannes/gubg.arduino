@@ -1,5 +1,5 @@
 require(File.join(ENV['gubg'], 'shared'))
-require('gubg/build/Executable')
+require('gubg/build/Library')
 include GUBG
 
 task :default => :help
@@ -11,6 +11,7 @@ end
 
 task :clean do
     rm_rf '.cache'
+    rm(FileList.new('lib*.a'))
 end
 
 task :declare do
@@ -41,6 +42,14 @@ task :declare do
 end
 
 task :define => :declare do
+    lib = Build::Library.new('arduino-core', arch: :uno)
+    avr_dir = shared('extern/Arduino-master/hardware/arduino/avr')
+    cpp_parts = %w[main]
+    c_parts = %w[wiring hooks]
+    lib.add_sources(cpp_parts.map{|part|File.join(avr_dir, "cores/arduino/#{part}.cpp")})
+    lib.add_sources(c_parts.map{|part|File.join(avr_dir, "cores/arduino/#{part}.c")})
+    lib.build
+    publish(lib.lib_filename, dst: 'lib')
 end
 
 task :test do
