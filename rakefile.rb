@@ -42,14 +42,23 @@ task :declare do
 end
 
 task :define => :declare do
-    lib = Build::Library.new('arduino-core', arch: :uno)
-    avr_dir = shared('extern/Arduino-master/hardware/arduino/avr')
-    cpp_parts = %w[main]
-    c_parts = %w[wiring hooks wiring_digital]
-    lib.add_sources(cpp_parts.map{|part|File.join(avr_dir, "cores/arduino/#{part}.cpp")})
-    lib.add_sources(c_parts.map{|part|File.join(avr_dir, "cores/arduino/#{part}.c")})
-    lib.build
-    publish(lib.lib_filename, dst: 'lib')
+    archs = [:lilypad, :uno]
+    archs.each do |arch|
+        lib = Build::Library.new('arduino-core', arch: arch)
+        puts("#{lib.lib_filename}")
+        avr_dir = shared('extern/Arduino-master/hardware/arduino/avr')
+        cpp_parts = %w[main]
+        c_parts = %w[wiring hooks wiring_digital]
+        case arch
+        when :lilypad
+            cpp_parts += %w[USBCore PluggableUSB CDC HardwareSerial HardwareSerial0 HardwareSerial1 HardwareSerial2 HardwareSerial3 IPAddress Print Stream Tone WMath WString abi new] 
+            c_parts += %w[WInterrupts wiring_analog wiring_pulse wiring_shift]
+        end
+        lib.add_sources(cpp_parts.map{|part|File.join(avr_dir, "cores/arduino/#{part}.cpp")})
+        lib.add_sources(c_parts.map{|part|File.join(avr_dir, "cores/arduino/#{part}.c")})
+        lib.build
+        publish(lib.lib_filename, dst: "lib/#{arch}")
+    end
 end
 
 task :test do
