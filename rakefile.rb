@@ -41,6 +41,7 @@ task :declare do
     end
 end
 
+#sudo apt install gcc-avr avr-libc
 task :define => :declare do
     archs = [:lilypad, :uno]
     archs.each do |arch|
