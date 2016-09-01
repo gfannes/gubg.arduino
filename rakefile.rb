@@ -44,6 +44,7 @@ end
 #sudo apt install gcc-avr avr-libc
 task :define => :declare do
     archs = [:lilypad, :uno]
+    # archs = [:uno]
     archs.each do |arch|
         lib = Build::Library.new('arduino-core', arch: arch)
         puts("#{lib.lib_filename}")
