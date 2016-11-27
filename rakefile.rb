@@ -41,7 +41,7 @@ task :declare do
     end
 end
 
-#sudo apt install gcc-avr avr-libc
+#sudo apt install gcc-avr avr-libc avrdude
 task :define => :declare do
     archs = [:lilypad, :uno]
     # archs = [:uno]
