@@ -58,6 +58,8 @@ task :define => :declare do
         end
         lib.add_sources(cpp_parts.map{|part|File.join(avr_dir, "cores/arduino/#{part}.cpp")})
         lib.add_sources(c_parts.map{|part|File.join(avr_dir, "cores/arduino/#{part}.c")})
+        lib_dir = shared('extern/Arduino-master/libraries')
+        lib.add_sources(File.join(lib_dir, "Servo/src/avr/Servo.cpp"))
         lib.build
         publish(lib.lib_filename, dst: "lib/#{arch}")
     end
