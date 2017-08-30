@@ -2,11 +2,8 @@ require(File.join(ENV['gubg'], 'shared'))
 require('gubg/build/Library')
 include GUBG
 
-task :default => :help
-task :help do
-    puts("The following tasks can be specified:")
-    puts("* declare: installs the arduino SDK")
-    puts("* define: ")
+task :default do
+    sh "rake -T"
 end
 
 task :clean do
@@ -14,7 +11,7 @@ task :clean do
     rm(FileList.new('lib*.a'))
 end
 
-task :declare do
+task :prepare do
     build_ok_fn = 'gubg.build.ok'
 
     Dir.chdir(shared_dir('extern')) do
@@ -42,7 +39,7 @@ task :declare do
 end
 
 #sudo apt install gcc-avr avr-libc avrdude
-task :define => :declare do
+task :run do
     archs = [:lilypad, :uno]
     # archs = [:uno]
     archs.each do |arch|
