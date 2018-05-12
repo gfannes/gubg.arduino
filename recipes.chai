@@ -1,0 +1,6 @@
+{
+    var mod = cook["arduino"]
+    mod.recipe("core", "library", fun(r){
+        r.add("extern/ArduinoCore-avr", "cores/arduino/*.c")
+    })
+}
