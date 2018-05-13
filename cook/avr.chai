@@ -1,0 +1,127 @@
+//"/usr/bin/avr-gcc" -w -Os -g -flto -fuse-linker-plugin -Wl,--gc-sections -mmcu=atmega328p  -o "/tmp/arduino_build_119954/sketch_jan25a.ino.elf" "/tmp/arduino_build_119954/sketch/sketch_jan25a.ino.cpp.o" "/tmp/arduino_build_119954/core/core.a" "-L/tmp/arduino_build_119954" -lm
+
+cook.toolchain.configure(2, "Arduino configuration", fun(e,k,v,b) {
+    if (v != "true") {
+        return false
+    }
+
+    if (false) {
+    } else if (k == "uno" || k == "lilypad" || k == "mega" || k == "due") {
+        b.add_config("arch", k);
+        auto & tm = e.translators();
+        tm[Part.Define] = fun(k,v)
+        {
+            if (v.empty()){
+                return "-D${k}"
+            }
+            return "-D'${k}=${v}'"
+        }
+    } else {
+        return false
+    }
+
+    return true
+})
+
+cook.toolchain.configure(100, "Arduino configuration", fun(e,k,v,b) {
+
+    auto & kv = e.key_values();
+    auto & tm = e.translators();
+
+    if (false) {
+    } else if (e.type == ElementType.Compile) {
+        if (false) {
+        } else if (k == "optimization" && v == "max_speed") {
+            kv.append(Part.Pre, "-Os")
+        } else if (k == "arch" && v == "uno") {
+            kv.append(Part.Pre, "-mmcu=atmega328p")
+            kv.append(Part.Define, "F_CPU", "16000000L")
+            kv.append(Part.Define, "ARDUINO_AVR_UNO")
+            b.add_config("variant", "standard")
+        } else if (k == "arch" && v == "mega") {
+            kv.append(Part.Pre, "-mmcu=atmega2560")
+            kv.append(Part.Define, "F_CPU", "16000000L")
+            kv.append(Part.Define, "ARDUINO_AVR_MEGA2560")
+            b.add_config("variant", "mega")
+        } else if (k == "arch" && v == "lilypad") {
+            b.add_config("variant", "leonardo")
+            kv.append(Part.Pre, "-mmcu=atmega32u4")
+            kv.append(Part.Define, "F_CPU", "8000000L")
+            kv.append(Part.Define, "ARDUINO_AVR_LILYPAD_USB")
+            kv.append(Part.Define, "USB_VID", "0x1B4F")
+            kv.append(Part.Define, "USB_PID", "0x9208")
+            kv.append(Part.Define, "USB_MANUFACTURER", "Unknown")
+            kv.append(Part.Define, "USB_PRODUCT", "\"LilyPad USB\"")
+        } else if (k == "c++-standard" && e.language == Language.CXX) {
+            kv.append(Part.Pre, "-std", "c++${v}")
+        } else if (k == "c-standard" && e.language == Language.C) {
+            kv.append(Part.Pre, "-std", "c${v}")
+        } else {
+            return false;
+        }
+    } else if (e.type == ElementType.Link) {
+        if (false) {
+        } else if (k == "arch" && v == "uno") {
+            kv.append(Part.Pre, "-mmcu=atmega328p")
+        } else if (k == "arch" && v == "mega") {
+            kv.append(Part.Pre, "-mmcu=atmega2560")
+        } else if (k == "arch" && v == "lilypad") {
+            kv.append(Part.Pre, "-mmcu=atmega32u4")
+            kv.append(Part.Library, "m")
+        } else if (k == "c++-standard") {
+            kv.append(Part.Pre, "-std", "c++${v}") 
+        } else if (k == "c-standard") {
+            kv.append(Part.Pre, "-std", "c${v}")
+        } else {
+            return false
+        }
+    } else if (e.type == ElementType.Archive) {
+        if (false) {
+        } else {
+            return false
+        }
+    } else {
+        return false
+    }
+    return true
+})
+
+for( s: [[Language.C, "avr-gcc"], [Language.CXX, "avr-g++"], [Language.ASM, "avr-gcc"]]) {
+    var compiler = cook.toolchain.element(ElementType.Compile, s[0])
+    var & kv = compiler.key_values()
+
+    kv.clear(Part.Cli);
+    kv.append(Part.Cli, s[1])
+
+    kv.append(Part.Pre, "-ffunction-sections -fdata-sections -flto")
+    if (s[0] == Language.C){
+        kv.append(Part.Pre, "-fno-fat-lto-objects")
+    }
+    if (s[0] == Language.CXX){
+        kv.append(Part.Pre, "-fpermissive -fno-exceptions -fno-threadsafe-statics -fno-devirtualize -fno-use-cxa-atexit")
+    }
+    if (s[0] == Language.ASM){
+        kv.append(Part.Pre, "-x assembler-with-cpp")
+    }
+
+    kv.append(Part.Define, "ARDUINO", "10805")
+    kv.append(Part.Define, "ARDUINO_ARCH_AVR")
+}
+{
+    var compiler = cook.toolchain.element(ElementType.Archive, Language.Binary)
+    var & kv = compiler.key_values()
+
+    kv.clear(Part.Cli);
+    kv.append(Part.Cli, "avr-gcc-ar")
+
+    kv.clear(Part.Pre);
+    kv.append(Part.Pre, "rcs")
+}
+{
+    var compiler = cook.toolchain.element(ElementType.Link, Language.Binary)
+    var & kv = compiler.key_values()
+
+    kv.clear(Part.Cli);
+    kv.append(Part.Cli, "avr-gcc")
+    kv.append(Part.Pre, "-flto -fuse-linker-plugin -Wl,--gc-sections,--relax")
+}

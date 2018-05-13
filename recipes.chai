@@ -1,6 +1,11 @@
 {
     var mod = cook["arduino"]
     mod.recipe("core", "library", fun(r){
-        r.add("extern/ArduinoCore-avr", "cores/arduino/*.c")
+        for (glob: ["*.c", "*.h", "*.cpp", "*.S"]){
+            r.add("extern/ArduinoCore-avr/cores/arduino", glob)
+            cook.toolchain.each_config("variant", fun[r, glob](variant){
+                r.add("extern/ArduinoCore-avr/variants/${variant}", glob)
+            })
+        }
     })
 }
