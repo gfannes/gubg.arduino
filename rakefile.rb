@@ -12,6 +12,7 @@ task :clean do
 end
 
 task :prepare do
+    GUBG::publish('src', pattern: '**/*.rb', dst: 'ruby')
     Dir.chdir(GUBG::mkdir('extern')) do
         unless File.exist?('ArduinoCore-avr')
             sh "git clone --depth 1 https://github.com/arduino/ArduinoCore-avr"
