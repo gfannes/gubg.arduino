@@ -29,7 +29,7 @@ cook.toolchain.configure(100, "Arduino configuration", fun(e,k,v,b) {
     auto & tm = e.translators();
 
     if (false) {
-    } else if (e.type == ElementType.Compile) {
+    } else if (e.element_type == ElementType.Compile) {
         if (false) {
         } else if (k == "optimization" && v == "max_speed") {
             kv.append(Part.Pre, "-Os")
@@ -59,7 +59,7 @@ cook.toolchain.configure(100, "Arduino configuration", fun(e,k,v,b) {
         } else {
             return false;
         }
-    } else if (e.type == ElementType.Link) {
+    } else if (e.element_type == ElementType.Link) {
         if (false) {
         } else if (k == "arch" && v == "uno") {
             kv.append(Part.Pre, "-mmcu=atmega328p")
@@ -75,7 +75,7 @@ cook.toolchain.configure(100, "Arduino configuration", fun(e,k,v,b) {
         } else {
             return false
         }
-    } else if (e.type == ElementType.Archive) {
+    } else if (e.element_type == ElementType.Archive) {
         if (false) {
         } else {
             return false
@@ -87,7 +87,7 @@ cook.toolchain.configure(100, "Arduino configuration", fun(e,k,v,b) {
 })
 
 for( s: [[Language.C, "avr-gcc"], [Language.CXX, "avr-g++"], [Language.ASM, "avr-gcc"]]) {
-    var compiler = cook.toolchain.element(ElementType.Compile, s[0])
+    var compiler = cook.toolchain.element(ElementType.Compile, s[0], TargetType.Object)
     var & kv = compiler.key_values()
 
     kv.clear(Part.Cli);
@@ -108,7 +108,7 @@ for( s: [[Language.C, "avr-gcc"], [Language.CXX, "avr-g++"], [Language.ASM, "avr
     kv.append(Part.Define, "ARDUINO_ARCH_AVR")
 }
 {
-    var compiler = cook.toolchain.element(ElementType.Archive, Language.Binary)
+    var compiler = cook.toolchain.element(ElementType.Archive, Language.Binary, TargetType.Archive)
     var & kv = compiler.key_values()
 
     kv.clear(Part.Cli);
@@ -118,7 +118,7 @@ for( s: [[Language.C, "avr-gcc"], [Language.CXX, "avr-g++"], [Language.ASM, "avr
     kv.append(Part.Pre, "rcs")
 }
 {
-    var compiler = cook.toolchain.element(ElementType.Link, Language.Binary)
+    var compiler = cook.toolchain.element(ElementType.Link, Language.Binary, TargetType.Executable)
     var & kv = compiler.key_values()
 
     kv.clear(Part.Cli);
