@@ -8,4 +8,9 @@
             })
         }
     })
+    mod.recipe("servo", "library", fun(r){
+        r.add("extern/Servo/src", "*.h")
+        r.add("extern/Servo/src", "avr/**")
+        r.depends_on("core")
+    })
 }

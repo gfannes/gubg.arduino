@@ -17,6 +17,9 @@ task :prepare do
         unless File.exist?('ArduinoCore-avr')
             sh "git clone --depth 1 https://github.com/arduino/ArduinoCore-avr"
         end
+        unless File.exist?('Servo')
+            sh "git clone --depth 1 https://github.com/arduino-libraries/Servo"
+        end
     end
 end
 
