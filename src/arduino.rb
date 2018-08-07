@@ -13,8 +13,9 @@ module Arduino
 
             arch = (na[:arch]||:uno).to_sym
             settings = {
-                mega:    {programmer: "wiring", partno: "atmega2560", baudrate: 115200},
-                lilypad: {programmer: "avr109", partno: "atmega32u4", baudrate: 57600},
+                uno:     {programmer: "arduino", partno: "atmega328p", baudrate: 115200},
+                mega:    {programmer: "wiring",  partno: "atmega2560", baudrate: 115200},
+                lilypad: {programmer: "avr109",  partno: "atmega32u4", baudrate: 57600},
             }[arch]
             raise("Could not find avrdude settings for arch \"#{arch}\"") unless settings
 
