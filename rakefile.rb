@@ -9,6 +9,9 @@ task :clean do
     rm_rf '.cache'
     rm(FileList.new('lib*.a'))
 end
+task :proper do
+    rm_rf "extern"
+end
 
 task :prepare do
     GUBG::publish('src', pattern: '**/*.rb', dst: 'ruby')
