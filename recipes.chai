@@ -14,3 +14,9 @@
         r.depends_on("core")
     })
 }
+{
+    var mod = cook["gubg"]
+    mod.recipe("arduino", fun(rcp){
+        rcp.add("src", "gubg/**/*.hpp")
+    })
+}
