@@ -8,6 +8,7 @@ namespace gubg { namespace arduino {
     {
     public:
         void start_timer(T value) { value_ = value; }
+        void add_to_timer(T value) { value_ += value; }
         T timer() const {return value_;}
 
         void process(T elapsed)
