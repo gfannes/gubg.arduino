@@ -3,14 +3,14 @@
 
 namespace gubg { namespace arduino { 
 
-    template <typename Receiver>
+    template <typename T, typename Receiver>
     class Timer_crtp
     {
     public:
-        void start_timer(unsigned long value) { value_ = value; }
-        unsigned long timer() const {return value_;}
+        void start_timer(T value) { value_ = value; }
+        T timer() const {return value_;}
 
-        void process(unsigned long elapsed)
+        void process(T elapsed)
         {
             while (true)
             {
@@ -37,7 +37,7 @@ namespace gubg { namespace arduino {
     private:
         Receiver &receiver_() {return *static_cast<Receiver*>(this);}
 
-        unsigned long value_ = 0;
+        T value_ = 0;
     };
 
 } } 
