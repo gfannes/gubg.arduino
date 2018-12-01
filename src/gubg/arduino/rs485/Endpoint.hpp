@@ -63,6 +63,7 @@ namespace gubg { namespace arduino { namespace rs485 {
             const auto nr_to_write = std::min<unsigned int>(size-offset, hws_->availableForWrite());
             hws_->write((const std::uint8_t *)buffer, nr_to_write);
             Base::add_to_timer(char_duration_us_*nr_to_write);
+            is_sending_ = true;
             offset += nr_to_write;
             MSS_END();
         }
