@@ -28,7 +28,7 @@ namespace gubg { namespace arduino { namespace rs485 {
 
             {
                 const auto nr_bits = nr_bits_(config);
-                char_duration_us_ = nr_bits*1000000ul/baud_rate;
+                char_duration_us_ = nr_bits*(1000000ul/baud_rate+1);
             }
 
             change_state_(State::Listening);
@@ -75,17 +75,16 @@ namespace gubg { namespace arduino { namespace rs485 {
             MSS_BEGIN(bool);
 
             MSS(!!hws_);
-
-            //Append to buffer
-            for (auto nr_to_write = std::min<unsigned int>(size-offset, buffer_.size()-buffer_size_);
-                    nr_to_write > 0;
-                    --nr_to_write, ++buffer_size_, ++offset)
+            if (!is_sending_)
             {
-                buffer_[buffer_size_] = (std::uint8_t)buffer[offset];
+                is_sending_ = true;
+                digitalWrite(tx_enable_pin_, is_sending_);
+                Base::start_timer(char_duration_us_);
             }
-
-            send_buffer_();
-
+            const auto nr_to_write = std::min<unsigned int>(size-offset, hws_->availableForWrite());
+            hws_->write((const std::uint8_t *)buffer, nr_to_write);
+            Base::add_to_timer(char_duration_us_*nr_to_write);
+            offset += nr_to_write;
             MSS_END();
         }
         void send_buffer_()
