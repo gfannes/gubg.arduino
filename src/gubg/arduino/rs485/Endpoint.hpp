@@ -6,6 +6,7 @@
 #include "gubg/std/cstdint.hpp"
 #include "gubg/std/algorithm.hpp"
 #include "gubg/arduino/Timer.hpp"
+#include "gubg/arduino/Pin.hpp"
 #include "gubg/mss.hpp"
 #include "HardwareSerial.h"
 
@@ -13,14 +14,16 @@ namespace gubg { namespace arduino { namespace rs485 {
 
     class Endpoint
     {
+    private:
+        const static bool Listen = false;
+        const static bool Send   = true;
+
     public:
         void init(HardwareSerial &hws, unsigned int tx_enable_pin, unsigned long baud_rate, std::uint8_t config)
         {
             hws_ = &hws;
-            tx_enable_pin_ = tx_enable_pin;
-
-            pinMode(tx_enable_pin_, OUTPUT);
-            digitalWrite(tx_enable_pin_, is_sending_);
+            tx_enable_pin_.set_pin(tx_enable_pin);
+            tx_enable_pin_.set_output(Listen);
 
             hws_->begin(baud_rate, config);
 
@@ -35,13 +38,12 @@ namespace gubg { namespace arduino { namespace rs485 {
             MSS_BEGIN(bool);
             MSS(!!hws_);
             send_timer_.process(elapse, [&](){
-                    is_sending_ = false;
-                    digitalWrite(tx_enable_pin_, is_sending_);
+                    tx_enable_pin_.set_output(Listen);
                     });
             MSS_END();
         }
 
-        bool is_sending() const { return is_sending_; }
+        bool is_sending() const { return tx_enable_pin_.is_output(Send); }
 
         template <typename Byte>
         bool send(size_t &offset, const Byte *buffer, size_t size)
@@ -55,10 +57,9 @@ namespace gubg { namespace arduino { namespace rs485 {
         {
             MSS_BEGIN(bool);
             MSS(!!hws_);
-            if (!is_sending_)
+            if (!is_sending())
             {
-                is_sending_ = true;
-                digitalWrite(tx_enable_pin_, is_sending_);
+                tx_enable_pin_.set_output(Send);
                 send_timer_.start_timer(char_duration_us_);
             }
             const auto nr_to_write = std::min<unsigned int>(size-offset, hws_->availableForWrite());
@@ -100,8 +101,7 @@ namespace gubg { namespace arduino { namespace rs485 {
         }
         HardwareSerial *hws_ = nullptr;
         RelativeTimer<unsigned long> send_timer_;
-        bool is_sending_ = false;
-        unsigned int tx_enable_pin_;
+        Pin tx_enable_pin_;
         unsigned long char_duration_us_;
     };
 
