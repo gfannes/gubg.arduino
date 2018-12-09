@@ -5,9 +5,11 @@
 #include "gubg/std/cstddef.hpp"
 #include "gubg/std/cstdint.hpp"
 #include "gubg/std/algorithm.hpp"
+#include "gubg/arduino/Elapsed.hpp"
 #include "gubg/arduino/Timer.hpp"
 #include "gubg/arduino/Pin.hpp"
 #include "gubg/mss.hpp"
+#include "Arduino.h"
 #include "HardwareSerial.h"
 
 namespace gubg { namespace arduino { namespace rs485 { 
@@ -33,13 +35,11 @@ namespace gubg { namespace arduino { namespace rs485 {
             }
         }
 
-        bool process(unsigned long elapse)
+        bool process()
         {
             MSS_BEGIN(bool);
             MSS(!!hws_);
-            send_timer_.process(elapse, [&](){
-                    tx_enable_pin_.set_output(Listen);
-                    });
+            process_();
             MSS_END();
         }
 
@@ -49,24 +49,36 @@ namespace gubg { namespace arduino { namespace rs485 {
         bool send(size_t &offset, const Byte *buffer, size_t size)
         {
             static_assert(sizeof(Byte) == sizeof(std::byte), "Can only send byte-like elements");
-            return send_(offset, (const std::byte *)buffer, size);
+            MSS_BEGIN(bool);
+            MSS(!!hws_);
+            send_(offset, (const std::byte *)buffer, size);
+            MSS_END();
         }
 
     private:
-        bool send_(size_t &offset, const std::byte *buffer, size_t size)
+        void process_()
         {
-            MSS_BEGIN(bool);
-            MSS(!!hws_);
+            elapsed_.process(micros());
+            send_timer_.process(elapsed_(), [&](){
+                    tx_enable_pin_.set_output(Listen);
+                    });
+        }
+        void send_(size_t &offset, const std::byte *buffer, size_t size)
+        {
+            process_();
+
+            const auto nr_to_write = std::min<unsigned int>(size-offset, hws_->availableForWrite());
+            if (nr_to_write == 0)
+                return;
+
             if (!is_sending())
             {
                 tx_enable_pin_.set_output(Send);
-                send_timer_.start_timer(char_duration_us_);
+                send_timer_.start(char_duration_us_);
             }
-            const auto nr_to_write = std::min<unsigned int>(size-offset, hws_->availableForWrite());
             hws_->write((const std::uint8_t *)buffer, nr_to_write);
-            send_timer_.add_to_timer(char_duration_us_*nr_to_write);
+            send_timer_.add(char_duration_us_*nr_to_write);
             offset += nr_to_write;
-            MSS_END();
         }
         static unsigned int nr_bits_(std::uint8_t config)
         {
@@ -100,7 +112,8 @@ namespace gubg { namespace arduino { namespace rs485 {
             return 0;
         }
         HardwareSerial *hws_ = nullptr;
-        RelativeTimer<unsigned long> send_timer_;
+        Elapsed<unsigned long> elapsed_;
+        Timer<unsigned long> send_timer_;
         Pin tx_enable_pin_;
         unsigned long char_duration_us_;
     };
