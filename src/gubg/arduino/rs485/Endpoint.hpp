@@ -55,6 +55,16 @@ namespace gubg { namespace arduino { namespace rs485 {
             MSS_END();
         }
 
+        template <typename Byte>
+        bool receive(size_t &offset, Byte *buffer, size_t size)
+        {
+            static_assert(sizeof(Byte) == sizeof(std::byte), "Can only receive byte-like elements");
+            MSS_BEGIN(bool);
+            MSS(!!hws_);
+            receive_(offset, (std::byte *)buffer, size);
+            MSS_END();
+        }
+
     private:
         void process_()
         {
@@ -76,9 +86,23 @@ namespace gubg { namespace arduino { namespace rs485 {
                 tx_enable_pin_.set_output(Send);
                 send_timer_.start(char_duration_us_);
             }
-            hws_->write((const std::uint8_t *)buffer, nr_to_write);
+            hws_->write((const std::uint8_t *)buffer+offset, nr_to_write);
             send_timer_.add(char_duration_us_*nr_to_write);
             offset += nr_to_write;
+        }
+        void receive_(size_t &offset, std::byte *buffer, size_t size)
+        {
+            process_();
+
+            if (is_sending())
+                return;
+
+            const auto nr_to_read = std::min<unsigned int>(size-offset, hws_->available());
+            if (nr_to_read > 0)
+            {
+                const auto nr_read = hws_->readBytes((std::uint8_t*)buffer+offset, nr_to_read);
+                offset += nr_read;
+            }
         }
         static unsigned int nr_bits_(std::uint8_t config)
         {
