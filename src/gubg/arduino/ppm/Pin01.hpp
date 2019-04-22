@@ -1,12 +1,12 @@
-#ifndef HEADER_gubg_arduino_ppm_Pin_hpp_ALREADY_INCLUDED
-#define HEADER_gubg_arduino_ppm_Pin_hpp_ALREADY_INCLUDED
+#ifndef HEADER_gubg_arduino_ppm_Pin01_hpp_ALREADY_INCLUDED
+#define HEADER_gubg_arduino_ppm_Pin01_hpp_ALREADY_INCLUDED
 
 #include "Arduino.h"
 
 namespace gubg { namespace arduino { namespace ppm { 
 
     template <unsigned int PinId, unsigned int Min, unsigned int Max>
-    class Pin
+    class Pin01
     {
     public:
         void setup()
@@ -41,9 +41,9 @@ namespace gubg { namespace arduino { namespace ppm {
     };
 
     template <unsigned int PinId, unsigned int Min, unsigned int Max>
-    unsigned int Pin<PinId, Min, Max>::prev_ = 0;
+    unsigned int Pin01<PinId, Min, Max>::prev_ = 0;
     template <unsigned int PinId, unsigned int Min, unsigned int Max>
-    unsigned int Pin<PinId, Min, Max>::pulse_duration_ = 0;
+    unsigned int Pin01<PinId, Min, Max>::pulse_duration_ = 0;
 
 } } } 
 
