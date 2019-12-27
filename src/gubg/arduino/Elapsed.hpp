@@ -3,6 +3,9 @@
 
 namespace gubg { namespace arduino { 
 
+    //Converts absolute time (eg. since startup like micros() or millis())
+    //into time elapsed between different calls to process()
+
     template <typename T>
     class Elapsed
     {
