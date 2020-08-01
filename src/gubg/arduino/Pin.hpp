@@ -1,7 +1,8 @@
 #ifndef HEADER_gubg_arduino_Pin_hpp_ALREADY_INCLUDED
 #define HEADER_gubg_arduino_Pin_hpp_ALREADY_INCLUDED
 
-#include "gubg/std/cstdint.hpp"
+#include <gubg/std/cstdint.hpp>
+#include <Arduino.h>
 
 namespace gubg { namespace arduino { 
 
@@ -25,6 +26,7 @@ namespace gubg { namespace arduino {
         {
             pin_ = pin;
             state_ = State::HasPin;
+            return *this;
         }
 
         bool has_pin() const {return state_ != State::NoPin;}
