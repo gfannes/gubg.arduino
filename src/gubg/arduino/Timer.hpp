@@ -8,9 +8,10 @@ namespace gubg { namespace arduino {
     {
     public:
         //These functions can be called during process()-ing as well.
-        void start(T value) { value_ = value; }
-        void add(T value) { value_ += value; }
-        T value() const {return value_;}
+        void start(T value) { value_ =  value; }
+        void stop()         { value_ =  0; }
+        void add(T value)   { value_ += value; }
+        T    value() const  { return value_; }
 
         template <typename Ftor>
         void process(T elapsed, Ftor &&ftor)
