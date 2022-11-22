@@ -5,7 +5,7 @@ module Arduino
         exe_fn = File.absolute_path(exe_fn)
         puts(">> Programming #{exe_fn}")
 
-        GUBG::sandbox(chdir: false) do |dir|
+        Gubg::sandbox(chdir: false) do |dir|
             eep_fn = File.join(dir, "output.eep")
             hex_fn = File.join(dir, "output.hex")
             Rake.sh "avr-objcopy -O ihex -j .eeprom --set-section-flags=.eeprom=alloc,load --no-change-warnings --change-section-lma .eeprom=0 #{exe_fn} #{eep_fn}"
